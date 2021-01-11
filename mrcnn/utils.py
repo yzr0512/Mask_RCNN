@@ -596,27 +596,27 @@ def generate_anchors(scales, ratios, shape, feature_stride, anchor_stride):
     ratios = ratios.flatten()
 
     # Enumerate heights and widths from scales and ratios
-    heights = scales / np.sqrt(ratios)
-    widths = scales * np.sqrt(ratios)
+    heights = scales / np.sqrt(ratios) # [3]
+    widths = scales * np.sqrt(ratios)  # [3]
 
     # Enumerate shifts in feature space
-    shifts_y = np.arange(0, shape[0], anchor_stride) * feature_stride
+    shifts_y = np.arange(0, shape[0], anchor_stride) * feature_stride # [128]
     shifts_x = np.arange(0, shape[1], anchor_stride) * feature_stride
-    shifts_x, shifts_y = np.meshgrid(shifts_x, shifts_y)
+    shifts_x, shifts_y = np.meshgrid(shifts_x, shifts_y) # [128, 128]
 
     # Enumerate combinations of shifts, widths, and heights
-    box_widths, box_centers_x = np.meshgrid(widths, shifts_x)
+    box_widths, box_centers_x = np.meshgrid(widths, shifts_x) # [128*128, 3]
     box_heights, box_centers_y = np.meshgrid(heights, shifts_y)
 
     # Reshape to get a list of (y, x) and a list of (h, w)
     box_centers = np.stack(
-        [box_centers_y, box_centers_x], axis=2).reshape([-1, 2])
+        [box_centers_y, box_centers_x], axis=2).reshape([-1, 2]) # [128*128*3, 2]
     box_sizes = np.stack([box_heights, box_widths], axis=2).reshape([-1, 2])
 
     # Convert to corner coordinates (y1, x1, y2, x2)
     boxes = np.concatenate([box_centers - 0.5 * box_sizes,
                             box_centers + 0.5 * box_sizes], axis=1)
-    return boxes
+    return boxes # [128*128*3, 4] <== [(shape/feature_stride/anchor_stride)**2*len(ratios), 4]
 
 
 def generate_pyramid_anchors(scales, ratios, feature_shapes, feature_strides,
@@ -636,7 +636,7 @@ def generate_pyramid_anchors(scales, ratios, feature_shapes, feature_strides,
     for i in range(len(scales)):
         anchors.append(generate_anchors(scales[i], ratios, feature_shapes[i],
                                         feature_strides[i], anchor_stride))
-    return np.concatenate(anchors, axis=0)
+    return np.concatenate(anchors, axis=0) # [128*128*3*5, 4]
 
 
 ############################################################
