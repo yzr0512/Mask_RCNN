@@ -273,7 +273,7 @@ class ProposalLayer(KE.Layer):
         self.proposal_count = proposal_count
         self.nms_threshold = nms_threshold
 
-    def call(self, inputs):
+    def call(self, inputs): # inputs: [rpn_class, rpn_bbox, anchors]
         # Box Scores. Use the foreground class confidence. [Batch, num_rois, 1]
         scores = inputs[0][:, :, 1]
         # Box deltas [batch, num_rois, 4]
